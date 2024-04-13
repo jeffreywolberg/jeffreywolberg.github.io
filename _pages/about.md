@@ -20,3 +20,5 @@ social: true  # includes social icons at the bottom of the page
 ---
 
 Welcome to my website! I'm a Senior at Columbia University studying computer science. I am interested in a broad array of topics, including machine learning, economics, philosophy, classical and jazz piano, and baseball.
+
+
