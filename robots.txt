@@ -1,4 +1,4 @@
 User-agent: *
 Disallow:
 
-Sitemap: https://jeffreywolberg.github.io/jeffreywolberg.github.io/sitemap.xml
+Sitemap: https://jeffreywolberg.github.io/sitemap.xml

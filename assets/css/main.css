@@ -20,14 +20,6 @@
   --global-divider-color: rgba(0,0,0,.1);
   --global-card-bg-color: #ffffff;
 }
-:root .fa-sun {
-  display: none;
-}
-:root .fa-moon {
-  padding-left: 10px;
-  padding-top: 12px;
-  display: block;
-}
 :root .repo-img-light {
   display: block;
 }
@@ -49,14 +41,6 @@ html[data-theme=dark] {
   --global-distill-app-color: #e8e8e8;
   --global-divider-color: #424246;
   --global-card-bg-color: #212529;
-}
-html[data-theme=dark] .fa-sun {
-  padding-left: 10px;
-  padding-top: 12px;
-  display: block;
-}
-html[data-theme=dark] .fa-moon {
-  display: none;
 }
 html[data-theme=dark] .repo-img-light {
   display: none;
