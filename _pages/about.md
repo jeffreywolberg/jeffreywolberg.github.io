@@ -22,3 +22,5 @@ social: true  # includes social icons at the bottom of the page
 Welcome to my website! I'm a Senior at Columbia University studying computer science. I am interested in a broad array of topics, including machine learning, economics, philosophy, classical and jazz piano, and baseball.
 
 
+
+I started playing classical piano at age 5, and I recorded many of my performances on [YouTube](https://www.youtube.com/channel/UCcLKoUT5LJ2wOfzqjIEYHpg).
