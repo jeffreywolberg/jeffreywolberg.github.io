@@ -1,3 +1,6 @@
+### To serve static html (e.g. to host a project) 
+To update any personal project or serve any static content, simply copy the html file into a folder where you want the project to be served e.g. (projects/youtube_page_scrape/index.html) will be hosted at https://jeffreywolberg.github.io/projects/youtube_page_scrape. Submodules are not allowed, only static files. Add onto sync_projects.sh to pull the latest project files before pushing to git.
+
 # al-folio
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [maintainers]: https://img.shields.io/badge/maintainers-4-success.svg 'Number of maintainers'
