@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YouTube Page Scrape</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: #f7f7f7;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+      }
+      .container {
+        background: #fff;
+        margin-top: 40px;
+        padding: 32px 28px 28px 28px;
+        border-radius: 12px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+        width: 100%;
+        max-width: 540;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+      label {
+        font-weight: 500;
+        margin-bottom: 6px;
+        display: block;
+        padding-left: 8px;
+        padding-right: 8px;
+      }
+      input[type="text"],
+      input[type="number"] {
+        width: calc(100% - 16px);
+        padding: 8px 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 1rem;
+        margin: 0 8px 12px 8px;
+        box-sizing: border-box;
+      }
+      .hidden {
+        display: none;
+      }
+      .video-embed {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 18px;
+      }
+      .pagebreak-list {
+        margin: 0 0 10px 0;
+        padding: 0;
+        list-style: none;
+      }
+      .pagebreak-list li {
+        background: #f0f0f0;
+        border-radius: 5px;
+        padding: 6px 10px;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .remove-btn {
+        background: #e74c3c;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        padding: 2px 8px;
+        cursor: pointer;
+        font-size: 0.9em;
+      }
+      .add-btn {
+        background: #3498db;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        padding: 6px 16px;
+        cursor: pointer;
+        font-size: 1em;
+        margin-top: 4px;
+      }
+      .flex-row {
+        display: flex;
+        gap: 10px;
+        align-items: flex-end;
+      }
+      .flex-col {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .section-title {
+        font-size: 1.1em;
+        font-weight: 600;
+        margin-bottom: 6px;
+        margin-top: 10px;
+        padding-left: 8px;
+        padding-right: 8px;
+      }
+      
+      .button-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        margin-top: 24px;
+      }
+      
+      #submit-btn, #download-btn {
+        background: #3498db;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 16px 32px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        min-width: 200px;
+        transition: background-color 0.2s;
+      }
+      
+      #submit-btn:hover, #download-btn:hover {
+        background: #2980b9;
+      }
+      
+      #download-btn:disabled {
+        background: #bdc3c7;
+        cursor: not-allowed;
+      }
+      
+      .status-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      }
+      
+      .status-content {
+        background: white;
+        border-radius: 12px;
+        padding: 32px;
+        max-width: 400px;
+        width: 90%;
+        text-align: center;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      }
+      
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
+      .status-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 12px;
+        color: #2c3e50;
+      }
+      
+      .status-message {
+        font-size: 1rem;
+        color: #7f8c8d;
+        margin-bottom: 16px;
+        line-height: 1.4;
+      }
+      
+      .status-time {
+        font-size: 0.9rem;
+        color: #95a5a6;
+        margin-bottom: 8px;
+      }
+      
+      .status-error {
+        color: #e74c3c;
+        font-weight: 500;
+        margin-top: 12px;
+        padding: 8px 12px;
+        background: #fdf2f2;
+        border-radius: 6px;
+        border-left: 4px solid #e74c3c;
+      }
+      
+      .status-success {
+        color: #27ae60;
+        font-weight: 500;
+        margin-top: 12px;
+        padding: 8px 12px;
+        background: #f0f9f0;
+        border-radius: 6px;
+        border-left: 4px solid #27ae60;
+      }
+      
+      .modal-download-btn {
+        background: #27ae60;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 24px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 16px;
+        transition: background-color 0.2s;
+      }
+      
+      .modal-download-btn:hover {
+        background: #229954;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <label for="youtube-link">YouTube Video Link</label>
+      <input
+        type="text"
+        id="youtube-link"
+        placeholder="Paste YouTube link here..."
+      />
+
+      <div id="video-section" class="hidden">
+        <!-- Embedded Video and Time Fields Component -->
+
+        <div class="video-embed" id="video-embed"></div>
+        <div class="flex-row">
+          <div class="flex-col" style="flex: 1">
+            <label for="start-time">Start Time (seconds)</label>
+            <input type="number" id="start-time" min="0" value=""/>
+          </div>
+          <div class="flex-col" style="flex: 1">
+            <label for="end-time">End Time (seconds)</label>
+            <input type="number" id="end-time" min="0" value="" placeholder="Leave empty for end of video" />
+          </div>
+        </div>
+
+        <!-- Crop Component -->
+
+        <div>
+          <div class="section-title">Crop</div>
+          <div class="flex-row" style="gap: 16px">
+            <div class="flex-col" style="flex: 1">
+              <label for="crop-top">Top</label>
+              <input
+                type="number"
+                id="crop-top"
+                min="0"
+                max="1"
+                step="0.01"
+                value="0"
+              />
+            </div>
+            <div class="flex-col" style="flex: 1">
+              <label for="crop-left">Left</label>
+              <input
+                type="number"
+                id="crop-left"
+                min="0"
+                max="1"
+                step="0.01"
+                value="0"
+              />
+            </div>
+            <div class="flex-col" style="flex: 1">
+              <label for="crop-bottom">Bottom</label>
+              <input
+                type="number"
+                id="crop-bottom"
+                min="0"
+                max="1"
+                step="0.01"
+                value="1"
+              />
+            </div>
+            <div class="flex-col" style="flex: 1">
+              <label for="crop-right">Right</label>
+              <input
+                type="number"
+                id="crop-right"
+                min="0"
+                max="1"
+                step="0.01"
+                value="1"
+              />
+            </div>
+          </div>
+          <div
+            style="
+              margin-top: 18px;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+            "
+          >
+            <div
+              style="
+                position: relative;
+                width: 420px;
+                height: 236px;
+                background: #222;
+              "
+            >
+              <canvas
+                id="frame-canvas"
+                width="420"
+                height="236"
+                style="display: block"
+              ></canvas>
+              <div
+                id="crop-box"
+                style="
+                  position: absolute;
+                  border: 2px solid #2196f3;
+                  pointer-events: none;
+                "
+              ></div>
+            </div>
+            <div style="font-size: 0.95em; color: #888; margin-top: 4px">
+              Frame at start time, blue box shows crop region
+            </div>
+          </div>
+        </div>
+
+        <div class="button-container">
+          <button id="submit-btn">Start Extraction</button>
+        </div>
+        <pre id="status-area" style="display: none"></pre>
+        
+        <!-- Status Modal -->
+        <div id="status-modal" class="status-modal" style="display: none;">
+          <div class="status-content">
+            <div class="spinner" id="status-spinner"></div>
+            <div class="status-title" id="status-title">Processing...</div>
+            <div class="status-message" id="status-message">Starting extraction...</div>
+            <div class="status-time" id="status-time"></div>
+            <div id="status-details"></div>
+            <button id="modal-download-btn" class="modal-download-btn" style="display: none;">Download PDF</button>
+          </div>
+        </div>
+
+        <!-- Pagebreaks Component
+        <div>
+          <div class="section-title">Pagebreaks</div>
+          <ul class="pagebreak-list" id="pagebreak-list"></ul>
+          <div class="flex-row">
+            <input
+              type="number"
+              id="pagebreak-timestamp"
+              min="0"
+              placeholder="Timestamp (s)"
+            />
+            <input
+              type="text"
+              id="pagebreak-title"
+              placeholder="Optional title after break"
+            />
+            <button class="add-btn" id="add-pagebreak">Add</button>
+          </div>
+        </div> -->
+      </div>
+    </div>
+    <script>
+      const ytInput = document.getElementById("youtube-link");
+      const videoSection = document.getElementById("video-section");
+      const videoEmbed = document.getElementById("video-embed");
+      const startTimeInput = document.getElementById("start-time");
+      const endTimeInput = document.getElementById("end-time");
+      const pagebreakList = document.getElementById("pagebreak-list");
+      const pagebreakTimestamp = document.getElementById("pagebreak-timestamp");
+      const pagebreakTitle = document.getElementById("pagebreak-title");
+      const addPagebreakBtn = document.getElementById("add-pagebreak");
+      const cropTop = document.getElementById("crop-top");
+      const cropLeft = document.getElementById("crop-left");
+      const cropBottom = document.getElementById("crop-bottom");
+      const cropRight = document.getElementById("crop-right");
+      const frameCanvas = document.getElementById("frame-canvas");
+      const cropBox = document.getElementById("crop-box");
+      let ytPlayer, ytID;
+      let frameLoaded = false;
+      
+      // Global constants for crop validation
+      const MIN_CROP_WIDTH = 0.1;
+      const MIN_CROP_HEIGHT = 0.1;
+
+      document.getElementById("submit-btn").onclick = async function () {
+        // Prevent multiple clicks
+        const submitBtn = document.getElementById("submit-btn");
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Processing...";
+        
+        // Show status modal
+        const statusModal = document.getElementById("status-modal");
+        const statusTitle = document.getElementById("status-title");
+        const statusMessage = document.getElementById("status-message");
+        const statusTime = document.getElementById("status-time");
+        const statusDetails = document.getElementById("status-details");
+        const statusSpinner = document.getElementById("status-spinner");
+        
+        statusModal.style.display = "flex";
+        statusTitle.textContent = "Processing...";
+        statusMessage.textContent = "Starting extraction...";
+        statusTime.textContent = "";
+        statusDetails.innerHTML = "";
+        
+        // Gather params from your form fields
+        const t0Input = document.getElementById("start-time").value;
+        const t1Input = document.getElementById("end-time").value;
+        
+        // Validate required fields
+        const url = document.getElementById("youtube-link").value;
+        if (!url.trim()) {
+          alert("Please enter a YouTube URL");
+          return;
+        }
+        
+        if (t0Input === "" || isNaN(parseFloat(t0Input))) {
+          alert("Please enter a valid start time");
+          return;
+        }
+        
+        const t0 = parseFloat(t0Input);
+        const t1 = t1Input === "" ? null : parseFloat(t1Input);
+        
+        const params = {
+          url: document.getElementById("youtube-link").value,
+          t0: t0,
+          t1: t1,
+          crop: [
+            parseFloat(document.getElementById("crop-top").value),
+            parseFloat(document.getElementById("crop-left").value),
+            parseFloat(document.getElementById("crop-bottom").value),
+            parseFloat(document.getElementById("crop-right").value),
+          ],
+        };
+        const { job_id } = await startExtraction(params);
+
+        // Show status area
+        document.getElementById("status-area").style.display = "block";
+
+        pollStatus(
+          job_id,
+          (status) => {
+            // Update status modal
+            statusTitle.textContent = status.status === "done" ? "Complete!" : "Processing...";
+            statusMessage.textContent = status.message || "Processing...";
+            
+            if (status.started_at) {
+              const startTime = new Date(status.started_at).toLocaleTimeString();
+              statusTime.textContent = `Started at ${startTime}`;
+            }
+            
+            if (status.error) {
+              statusDetails.innerHTML = `<div class="status-error">Error: ${status.error}</div>`;
+              statusSpinner.style.display = "none";
+              // Re-enable submit button on error
+              submitBtn.disabled = false;
+              submitBtn.textContent = "Start Extraction";
+            } else if (status.status === "done") {
+              statusDetails.innerHTML = `<div class="status-success">Extraction completed successfully!</div>`;
+              statusSpinner.style.display = "none";
+              
+              // Show download button
+              const modalDownloadBtn = document.getElementById("modal-download-btn");
+              modalDownloadBtn.style.display = "inline-block";
+              modalDownloadBtn.onclick = () => {
+                downloadPDF(job_id);
+                // Hide modal after download starts
+                statusModal.style.display = "none";
+                // Re-enable submit button
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Start Extraction";
+              };
+            }
+            
+            // Update status area (for debugging)
+            document.getElementById("status-area").innerText = JSON.stringify(
+              status,
+              null,
+              2
+            );
+          },
+          () => {
+            // Download button is now handled in the modal
+          }
+        );
+      };
+
+      function extractYouTubeID(url) {
+        const regExp =
+          /^.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+        console.log(`URL ${url} found`);
+        const match = url.match(regExp);
+        return match && match[1].length === 11 ? match[1] : null;
+      }
+
+      ytInput.addEventListener("change", function () {
+        console.log("YouTube input changed to:", ytInput.value);
+        ytID = extractYouTubeID(ytInput.value.trim());
+        console.log(`Found YouTube ID ${ytID}`);
+        if (ytID) {
+          videoEmbed.innerHTML = `<div id="yt-iframe-wrap"><iframe id="yt-iframe" width="420" height="236" src="https://www.youtube.com/embed/${ytID}?enablejsapi=1" frameborder="0" allowfullscreen></iframe></div>`;
+          videoSection.classList.remove("hidden");
+          loadFrameFromYouTube(); // <-- Automatically load the thumbnail
+        } else {
+          videoEmbed.innerHTML = "";
+          videoSection.classList.add("hidden");
+          const ctx = frameCanvas.getContext("2d");
+          ctx.clearRect(0, 0, frameCanvas.width, frameCanvas.height);
+          updateCropBox();
+        }
+      });
+
+      // Crop field logic
+      function enforceCropBounds() {
+        let t = parseFloat(cropTop.value),
+          l = parseFloat(cropLeft.value),
+          b = parseFloat(cropBottom.value),
+          r = parseFloat(cropRight.value);
+          b = Math.min(1, Math.max(0, b));
+          r = Math.min(1, Math.max(0, r));
+          l = Math.max(0, Math.min(l, 1));
+          t = Math.max(0, Math.min(t, 1));
+
+        cropTop.value = t.toFixed(2);
+        cropLeft.value = l.toFixed(2);
+        cropBottom.value = b.toFixed(2);
+        cropRight.value = r.toFixed(2);
+      }
+      [cropTop, cropLeft, cropBottom, cropRight].forEach((el) => {
+        el.addEventListener("change", function () {
+          enforceCropBounds();
+          updateCropBox();
+        });
+      });
+
+      function updateCropBox() {
+        const t = parseFloat(cropTop.value),
+          l = parseFloat(cropLeft.value),
+          b = parseFloat(cropBottom.value),
+          r = parseFloat(cropRight.value);
+        const w = frameCanvas.width,
+          h = frameCanvas.height;
+        cropBox.style.left = l * w + "px";
+        cropBox.style.top = t * h + "px";
+        cropBox.style.width = (r - l - .01) * w + "px";
+        cropBox.style.height = (b - t - .01) * h + "px";
+      }
+
+      // --- YouTube thumbnail extraction ---
+      function loadFrameFromYouTube() {
+        // Draw the YouTube thumbnail to the canvas
+        console.log(`loadFrameFromYouTube: ${ytID}`);
+        if (!ytID) return;
+        drawThumbnailToCanvas(ytID);
+      }
+
+      function drawThumbnailToCanvas(ytID) {
+        const w = frameCanvas.width,
+          h = frameCanvas.height;
+        const ctx = frameCanvas.getContext("2d");
+        // Use high quality thumbnail if available
+        const thumbUrl = `https://img.youtube.com/vi/${ytID}/maxresdefault.jpg`;
+        const img = new window.Image();
+        img.crossOrigin = "anonymous";
+        img.onload = function () {
+          ctx.clearRect(0, 0, w, h);
+          ctx.drawImage(img, 0, 0, w, h);
+          updateCropBox();
+        };
+        img.onerror = function () {
+          // fallback: fill with black if image fails to load
+          ctx.fillStyle = "#222";
+          ctx.fillRect(0, 0, w, h);
+          updateCropBox();
+        };
+        img.src = thumbUrl;
+      }
+
+      // Helper: POST to /extract
+      async function startExtraction(params) {
+        const res = await fetch("http://127.0.0.1:8001/extract", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(params),
+        });
+        return res.json(); // { job_id: ... }
+      }
+
+      // Helper: Poll /status/{job_id}
+      function pollStatus(job_id, onUpdate, onDone) {
+        const interval = setInterval(async () => {
+          const res = await fetch(`http://127.0.0.1:8001/status/${job_id}`);
+          const status = await res.json();
+          onUpdate(status);
+          if (status.status === "done") {
+            clearInterval(interval);
+            onDone();
+          }
+        }, 1000);
+      }
+
+      // Helper: Download PDF
+      function downloadPDF(job_id) {
+        window.open(`http://127.0.0.1:8001/download/${job_id}`, "_blank");
+      }
+
+    </script>
+  </body>
+</html>
