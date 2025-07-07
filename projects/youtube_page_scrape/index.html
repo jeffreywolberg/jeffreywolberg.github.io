@@ -380,6 +380,12 @@
       </div>
     </div>
     <script>
+      // Global constants for crop validation
+      const MIN_CROP_WIDTH = 0.1;
+      const MIN_CROP_HEIGHT = 0.1;
+
+      const API_ENDPOINT = "http://24.46.78.74:4443";
+
       const ytInput = document.getElementById("youtube-link");
       const videoSection = document.getElementById("video-section");
       const videoEmbed = document.getElementById("video-embed");
@@ -398,9 +404,6 @@
       let ytPlayer, ytID;
       let frameLoaded = false;
       
-      // Global constants for crop validation
-      const MIN_CROP_WIDTH = 0.1;
-      const MIN_CROP_HEIGHT = 0.1;
 
       document.getElementById("submit-btn").onclick = async function () {
         // Prevent multiple clicks
@@ -598,7 +601,7 @@
 
       // Helper: POST to /extract
       async function startExtraction(params) {
-        const res = await fetch("http://127.0.0.1:8001/extract", {
+        const res = await fetch(`${API_ENDPOINT}/extract`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(params),
@@ -609,7 +612,7 @@
       // Helper: Poll /status/{job_id}
       function pollStatus(job_id, onUpdate, onDone) {
         const interval = setInterval(async () => {
-          const res = await fetch(`http://127.0.0.1:8001/status/${job_id}`);
+          const res = await fetch(`${API_ENDPOINT}/status/${job_id}`);
           const status = await res.json();
           onUpdate(status);
           if (status.status === "done") {
@@ -621,9 +624,10 @@
 
       // Helper: Download PDF
       function downloadPDF(job_id) {
-        window.open(`http://127.0.0.1:8001/download/${job_id}`, "_blank");
+        window.open(`${API_ENDPOINT}/download/${job_id}`, "_blank");
       }
 
     </script>
   </body>
 </html>
+
