@@ -383,8 +383,10 @@
       // Global constants for crop validation
       const MIN_CROP_WIDTH = 0.1;
       const MIN_CROP_HEIGHT = 0.1;
-
-      const API_ENDPOINT = "http://24.46.78.74:4443";
+      
+      const API_ENDPOINT = "https://api.anagramsgold.com";
+      // const API_ENDPOINT = "https://143.244.220.150:4443";
+      // const API_ENDPOINT = "https://youtube-page-scrape.onrender.com";
 
       const ytInput = document.getElementById("youtube-link");
       const videoSection = document.getElementById("video-section");
@@ -411,7 +413,29 @@
         submitBtn.disabled = true;
         submitBtn.textContent = "Processing...";
         
-        // Show status modal
+        // Gather params from your form fields
+        const t0Input = document.getElementById("start-time").value;
+        const t1Input = document.getElementById("end-time").value;
+        
+        // Validate required fields
+        const url = document.getElementById("youtube-link").value;
+        if (!url.trim()) {
+          alert("Please enter a YouTube URL");
+          // Re-enable submit button on validation failure
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Start Extraction";
+          return;
+        }
+        
+        if (t0Input === "" || isNaN(parseFloat(t0Input))) {
+          alert("Please enter a valid start time");
+          // Re-enable submit button on validation failure
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Start Extraction";
+          return;
+        }
+        
+        // Show status modal only after validation passes
         const statusModal = document.getElementById("status-modal");
         const statusTitle = document.getElementById("status-title");
         const statusMessage = document.getElementById("status-message");
@@ -424,22 +448,6 @@
         statusMessage.textContent = "Starting extraction...";
         statusTime.textContent = "";
         statusDetails.innerHTML = "";
-        
-        // Gather params from your form fields
-        const t0Input = document.getElementById("start-time").value;
-        const t1Input = document.getElementById("end-time").value;
-        
-        // Validate required fields
-        const url = document.getElementById("youtube-link").value;
-        if (!url.trim()) {
-          alert("Please enter a YouTube URL");
-          return;
-        }
-        
-        if (t0Input === "" || isNaN(parseFloat(t0Input))) {
-          alert("Please enter a valid start time");
-          return;
-        }
         
         const t0 = parseFloat(t0Input);
         const t1 = t1Input === "" ? null : parseFloat(t1Input);
